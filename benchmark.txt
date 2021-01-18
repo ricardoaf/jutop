@@ -1,0 +1,65 @@
+MATLAB
+-------------------------------------------------------------------------------
+
+>> TrussScript3
+Creating structured domain ..
+Elapsed time is 0.001757 seconds.
+Generating Ground structure ..
+Elapsed time is 0.003725 seconds.
+Initializing finite element analysis ..
+Elapsed time is 0.008916 seconds.
+Initializing optimization procedure ..
+Elapsed time is 0.000499 seconds.
+Running optimization procedure, TrussTOP ..
+Elapsed time is 1.623581 seconds.
+Number of bars: 8 of 748
+Objective function value: 0.000773327
+Number of iterations: 832
+
+>> TrussScript4
+Creating structured domain ..
+Elapsed time is 0.007025 seconds.
+Generating Ground structure ..
+Elapsed time is 0.070300 seconds.
+Initializing finite element analysis ..
+Elapsed time is 0.086517 seconds.
+Initializing optimization procedure ..
+Elapsed time is 0.001195 seconds.
+Running optimization procedure, TrussTOP ..
+Elapsed time is 12.859754 seconds.
+Number of bars: 36 of 8744
+Objective function value: 0.000219176
+Number of iterations: 602
+
+JULIA
+-------------------------------------------------------------------------------
+
+TrussScript3
+Creating structured domain ..
+  0.000018 seconds (72 allocations: 14.062 KiB)
+Generating Ground structure ..
+  0.001003 seconds (3.38 k allocations: 2.347 MiB)
+Initializing finite element analysis ..
+  0.000622 seconds (10.53 k allocations: 2.021 MiB)
+Initializing optimization procedure ..
+  0.000002 seconds
+Running optimization procedure, TrussTOP ..
+  0.916297 seconds (57.49 k allocations: 611.757 MiB, 2.62% gc time)
+Number of bars: 8 of 748
+Objective function value: 0.000773327
+Number of iterations: 832
+
+TrussScript4
+Creating structured domain ..
+  0.000023 seconds (181 allocations: 45.891 KiB)
+Generating Ground structure ..
+  0.030016 seconds (22.30 k allocations: 47.962 MiB, 21.19% gc time)
+Initializing finite element analysis ..
+  0.014954 seconds (122.49 k allocations: 23.516 MiB, 15.87% gc time)
+Initializing optimization procedure ..
+  0.000003 seconds
+Running optimization procedure, TrussTOP ..
+  6.382618 seconds (41.62 k allocations: 5.692 GiB, 2.93% gc time)
+Number of bars: 36 of 8744
+Objective function value: 0.000219176
+Number of iterations: 602
