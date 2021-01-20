@@ -57,98 +57,98 @@ function TrussTop(FEA::FEM, Opt::OPT)::Tuple{Vector{Vector{Float64}}, Vector{Flo
 end
 
 #------------------------------------------------------------------------------
-# function ObjectiveFcn!(∂f∂x::Vector{Float64}, U::Vector{Float64}, x::Vector{Float64}, FEA::FEM)::Float64
-
-# 	FEAnalysis!(U, x, FEA)
-
-# 	@. FEA.Sparse.k = -U[FEA.Sparse.i] * FEA.Sparse.k0 * U[FEA.Sparse.j]
-# 	cumsum!(FEA.Sparse.k, FEA.Sparse.k)
-# 	∂f∂x[1] = FEA.Sparse.k[FEA.CumSumElemNDof2[1]]
-# 	∂f∂x[2:end] = diff(FEA.Sparse.k[FEA.CumSumElemNDof2])
-
-# 	f = FEA.Force ⋅ U
-# end
-
 function ObjectiveFcn!(∂f∂x::Vector{Float64}, U::Vector{Float64}, x::Vector{Float64}, FEA::FEM)::Float64
 
 	FEAnalysis!(U, x, FEA)
 
-	curr = 0.; prev = 0.; idx = 0
-	for i in eachindex(FEA.Sparse.i)
-		curr -= U[FEA.Sparse.i[i]] * FEA.Sparse.k0[i] * U[FEA.Sparse.j[i]]
-		if (i % FEA.ElemNDof[idx+1]^2) == 0
-			∂f∂x[idx+=1] = curr - prev
-			prev = curr
-		end
-	end
+	@fastmath @inbounds @. FEA.Sparse.k = -U[FEA.Sparse.i] * FEA.Sparse.k0 * U[FEA.Sparse.j]
+	@fastmath cumsum!(FEA.Sparse.k, FEA.Sparse.k)
+	∂f∂x[1] = FEA.Sparse.k[FEA.CumSumElemNDof2[1]]
+	@fastmath ∂f∂x[2:end] = diff(FEA.Sparse.k[FEA.CumSumElemNDof2])
 
-	f = FEA.Force ⋅ U
+	@fastmath f = FEA.Force ⋅ U
 end
+
+# function ObjectiveFcn!(∂f∂x::Vector{Float64}, U::Vector{Float64}, x::Vector{Float64}, FEA::FEM)::Float64
+
+# 	FEAnalysis!(U, x, FEA)
+
+# 	curr = 0.; prev = 0.; idx = 0
+# 	for i in eachindex(FEA.Sparse.i)
+# 		curr -= U[FEA.Sparse.i[i]] * FEA.Sparse.k0[i] * U[FEA.Sparse.j[i]]
+# 		if (i % FEA.ElemNDof[idx+1]^2) == 0
+# 			∂f∂x[idx+=1] = curr - prev
+# 			prev = curr
+# 		end
+# 	end
+
+# 	f = FEA.Force ⋅ U
+# end
 
 #------------------------------------------------------------------------------
 function ConstraintFcn!(∂g∂x::Vector{Float64}, x::Vector{Float64}, FEA::FEM, Opt::OPT)
 
-	∂g∂x .= FEA.ElemLen
-	g = FEA.ElemLen ⋅ x - Opt.VolMax
+	@fastmath ∂g∂x .= FEA.ElemLen
+	@fastmath g = FEA.ElemLen ⋅ x - Opt.VolMax
 end
 
 #------------------------------------------------------------------------------
-# function UpdateScheme!(x::Vector{Float64}, xTemp::Vector{Float64}, ∂f∂x::Vector{Float64},
-# 	g::Float64, ∂g∂x::Vector{Float64}, Opt::OPT)::Float64
-  
-# 	xMin, xMax, move, η = Opt.xMin, Opt.xMax, Opt.OCMove, Opt.OCEta
-  
-# 	@. ∂f∂x = min(∂f∂x, 0.)
-# 	@. xTemp = -∂f∂x / ∂g∂x
-# 	λ₁, λ₂ = 0., 1.2 * maximum(xTemp)
-	
-# 	@. xTemp = x
-# 	while (λ₂ - λ₁) > (1e-10 * (1 + λ₂))
-# 	  λₘ = (λ₁ + λ₂) / 2.
-	
-# 	  @. x = xMin + (xTemp - xMin) * ((-∂f∂x / ∂g∂x / λₘ) ^ η)
-# 	  @. x = min(x, xTemp + move, xMax)
-# 	  @. x = max(x, xTemp - move, xMin)
-	
-# 	  if (g + ∂g∂x ⋅ (x - xTemp))>0 λ₁ = λₘ else λ₂ = λₘ end
-# 	end
-	
-# 	@. xTemp = abs(x - xTemp) / (1. + xTemp)
-# 	Δ = maximum(xTemp)
-# end
-
 function UpdateScheme!(x::Vector{Float64}, xTemp::Vector{Float64}, ∂f∂x::Vector{Float64},
 	g::Float64, ∂g∂x::Vector{Float64}, Opt::OPT)::Float64
-
+  
 	xMin, xMax, move, η = Opt.xMin, Opt.xMax, Opt.OCMove, Opt.OCEta
-
-	λ₁, λ₂, = 0., -Inf
-	for i in eachindex(x)
-		∂f∂x[i] = min(∂f∂x[i], 0.)
-		λ₂ = max(λ₂, -∂f∂x[i] / ∂g∂x[i])
-		xTemp[i] = x[i]
-	end
-	λ₂ *= 1.2
-
+  
+	@fastmath @. ∂f∂x = min(∂f∂x, 0.)
+	@fastmath @. xTemp = -∂f∂x / ∂g∂x
+	@fastmath λ₁, λ₂ = 0., 1.2 * maximum(xTemp)
+	
+	@fastmath @. xTemp = x
 	while (λ₂ - λ₁) > (1e-10 * (1 + λ₂))
-		c, λₘ = g, (λ₁ + λ₂) / 2.
-
-		for i in eachindex(x)
-			x[i] = xMin + (xTemp[i] - xMin) * ((-∂f∂x[i] / ∂g∂x[i] / λₘ) ^ η)
-			x[i] = min(x[i], xTemp[i] + move, xMax)
-			x[i] = max(x[i], xTemp[i] - move, xMin)
-
-			c += ∂g∂x[i] * (x[i] - xTemp[i])
-		end
-		if c>0 λ₁ = λₘ else λ₂ = λₘ end
+	  λₘ = (λ₁ + λ₂) / 2.
+	
+	  @fastmath @. x = xMin + (xTemp - xMin) * ((-∂f∂x / ∂g∂x / λₘ) ^ η)
+	  @fastmath @. x = min(x, xTemp + move, xMax)
+	  @fastmath @. x = max(x, xTemp - move, xMin)
+	
+	  @fastmath if (g + ∂g∂x ⋅ (x - xTemp))>0 λ₁ = λₘ else λ₂ = λₘ end
 	end
-
-	Δ = -Inf
-	for i in eachindex(x)
-		Δ = max(Δ, abs(x[i] - xTemp[i]) / (1 + xTemp[i]))
-	end
-	return Δ
+	
+	@fastmath @. xTemp = abs(x - xTemp) / (1. + xTemp)
+	@fastmath Δ = maximum(xTemp)
 end
+
+# function UpdateScheme!(x::Vector{Float64}, xTemp::Vector{Float64}, ∂f∂x::Vector{Float64},
+# 	g::Float64, ∂g∂x::Vector{Float64}, Opt::OPT)::Float64
+
+# 	xMin, xMax, move, η = Opt.xMin, Opt.xMax, Opt.OCMove, Opt.OCEta
+
+# 	λ₁, λ₂, = 0., -Inf
+# 	for i in eachindex(x)
+# 		∂f∂x[i] = min(∂f∂x[i], 0.)
+# 		λ₂ = max(λ₂, -∂f∂x[i] / ∂g∂x[i])
+# 		xTemp[i] = x[i]
+# 	end
+# 	λ₂ *= 1.2
+
+# 	while (λ₂ - λ₁) > (1e-10 * (1 + λ₂))
+# 		c, λₘ = g, (λ₁ + λ₂) / 2.
+
+# 		for i in eachindex(x)
+# 			x[i] = xMin + (xTemp[i] - xMin) * ((-∂f∂x[i] / ∂g∂x[i] / λₘ) ^ η)
+# 			x[i] = min(x[i], xTemp[i] + move, xMax)
+# 			x[i] = max(x[i], xTemp[i] - move, xMin)
+
+# 			c += ∂g∂x[i] * (x[i] - xTemp[i])
+# 		end
+# 		if c>0 λ₁ = λₘ else λ₂ = λₘ end
+# 	end
+
+# 	Δ = -Inf
+# 	for i in eachindex(x)
+# 		Δ = max(Δ, abs(x[i] - xTemp[i]) / (1 + xTemp[i]))
+# 	end
+# 	return Δ
+# end
 
 #------------------------------------------------------------------------------
 function TrussTopView(xH::Vector{Vector{Float64}}, fH::Vector{Float64}, fem::FEM, Filter::Float64)

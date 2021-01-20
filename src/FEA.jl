@@ -88,11 +88,11 @@ function FEAnalysis!(U::Vector{Float64}, x::Vector{Float64}, FEA::FEM)
     NDof, Free = 2FEA.NNode, FEA.FreeDofs
     
     for idx in eachindex(FEA.Sparse.i)
-        FEA.Sparse.k[idx] = FEA.Sparse.k0[idx] * x[FEA.Sparse.e[idx]]
+        @fastmath FEA.Sparse.k[idx] = FEA.Sparse.k0[idx] * x[FEA.Sparse.e[idx]]
     end
-    K = sparse(FEA.Sparse.i, FEA.Sparse.j, FEA.Sparse.k, NDof, NDof)
+    @fastmath K = sparse(FEA.Sparse.i, FEA.Sparse.j, FEA.Sparse.k, NDof, NDof)
 
-    U[Free] = K[Free, Free] \ FEA.Force[Free]
+    @fastmath U[Free] = K[Free, Free] \ FEA.Force[Free]
 end
 
 #------------------------------------------------------------------------------
