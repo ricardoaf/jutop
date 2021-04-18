@@ -10,17 +10,17 @@ function TrussScript3()
 
     # ----- INPUT DATA -----
 
-    Nx, Ny = 6, 6  	 	 		 # Number of cells
-    Lx, Ly = 6., 6.  	 		 # Domain size
-    Supp = [[0.,-1., 1,1]]		 # Support list: position and type
-    Load = [[Lx,Ly/2., 0.,-1.]]  # Load list: position and value
-    GSLvl = 6 		 	 		 # Ground structure level
-    GSColTol = 0.999999  		 # Ground structure colinear tolerance
-    VolMax = Lx*Ly/9000. 		 # Volume constraint
-    Tol = 5e-9			 		 # Optimization convergence tolerance
-    MaxIter = 4000		 		 # Max number of optimization iterations
-    E = 7e+7 			 		 # Young's modulus
-    Filter = 0.01;               # Max area fraction threshold (for vieweing)
+    Nx, Ny = 6, 6  	 	 		  # Number of cells
+    Lx, Ly = 6., 6.  	 		  # Domain size
+    Supp = [[0.,-1., 1,1]]	      # Support list: position and type
+    Load = [[Lx,Ly/2., 0.,-100.]] # Load list: position and value
+    GSLvl = 6 		 	 		  # Ground structure level
+    GSColTol = 0.999999  		  # Ground structure colinear tolerance
+    VolMax = Lx*Ly/9000. 		  # Volume constraint
+    Tol = 5e-9			 		  # Optimization convergence tolerance
+    MaxIter = 4000		 		  # Max number of optimization iterations
+    E = 7e+7 			 		  # Young's modulus
+    Filter = 0.01;                # Max area fraction threshold (for vieweing)
 
     # ----- PRE PROCESSING -----
 

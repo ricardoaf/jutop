@@ -164,23 +164,23 @@ function TrussTopView(xH::Vector{Vector{Float64}}, fH::Vector{Float64}, fem::FEM
 	@printf("Objective function value: %g\n", fH[end]);
 	@printf("Number of iterations: %d\n", length(fH) - 1);
 
-	# # Calc stress
-	# U = zeros(2fem.NNode); FEAnalysis!(U, x, fem)
-	# σ = zeros(fem.NElem); Stress!(σ, U, fem)
+	# Calc stress
+	U = zeros(2fem.NNode); FEAnalysis!(U, x, fem)
+	σ = zeros(fem.NElem); Stress!(σ, U, fem)
 
-	# # Final topology
-	# FinalTopology = plot()
-	# # println(active)
-	# for e in active
-	# 	X = vec(fem.Node[fem.Elem[e,:],1])
-	# 	Y = vec(fem.Node[fem.Elem[e,:],2])
-	# 	clr = "blue"; if σ[e]<0; clr="red"; end
-	# 	global FinalTopology = plot!(X,Y,color=clr,linewidth=xEff[e]/MaxArea*5,legend=false, title="Final topology",
-	# 	aspect_ratio=:equal, grid=false, axis=false, ticks=false)
-	# end
-	# ActiveNodes = unique(fem.Elem[active,:])
-	# X = vec(fem.Node[ActiveNodes,1])
-	# Y = vec(fem.Node[ActiveNodes,2])
-	# FinalTopology = scatter!(X,Y,color="white",markersize=5, legend=false)
-	# display(FinalTopology)
+	# Final topology
+	FinalTopology = plot()
+	# println(active)
+	for e in active
+		X = vec(fem.Node[fem.Elem[e,:],1])
+		Y = vec(fem.Node[fem.Elem[e,:],2])
+		clr = "blue"; if σ[e]<0; clr="red"; end
+		global FinalTopology = plot!(X,Y,color=clr,linewidth=xEff[e]/MaxArea*5,legend=false, title="Final topology",
+		aspect_ratio=:equal, grid=false, axis=false, ticks=false)
+	end
+	ActiveNodes = unique(fem.Elem[active,:])
+	X = vec(fem.Node[ActiveNodes,1])
+	Y = vec(fem.Node[ActiveNodes,2])
+	FinalTopology = scatter!(X,Y,color="white",markersize=5, legend=false)
+	display(FinalTopology)
 end
